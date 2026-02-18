@@ -46,31 +46,35 @@ on run argv
       delay 0.5
     end repeat
     tell process "System Settings"
-      set position of window 1 to {100, 100}
+      -- Position bottom-right, terminal stays on top since we don't set frontmost
       set size of window 1 to {780, 700}
-      set frontmost to true
+      set position of window 1 to {950, 400}
     end tell
   end tell
-  delay 2
   
   -- Step 2: Find and click "Hide My Email" in iCloud+ Features
+  -- Poll until the iCloud+ Features section is rendered
+  set featGroup to missing value
   tell application "System Events"
     tell process "System Settings"
-      set contentScroll to scroll area 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
-      -- Find the iCloud+ Features group by scanning for its label
-      set featGroup to missing value
-      repeat with elem in UI elements of contentScroll
+      repeat 30 times
         try
-          if (class of elem is group) and (value of static text 1 of elem is "iCloud+ Features") then
-            set featGroup to elem
-            exit repeat
-          end if
+          set contentScroll to scroll area 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
+          repeat with elem in UI elements of contentScroll
+            try
+              if (class of elem is group) and (value of static text 1 of elem is "iCloud+ Features") then
+                set featGroup to elem
+                exit repeat
+              end if
+            end try
+          end repeat
+          if featGroup is not missing value then exit repeat
         end try
+        delay 0.5
       end repeat
       if featGroup is missing value then
         error "Could not find iCloud+ Features section."
       end if
-      -- Hide My Email is button 5 in the 2x3 grid (row 2, column 2)
       click button 5 of featGroup
     end tell
   end tell
@@ -167,8 +171,6 @@ on run argv
       click button "Continue" of group 2 of group 1 of navGroup
     end tell
   end tell
-  delay 1
-  
   -- Step 8: Copy email to clipboard
   do shell script "echo " & quoted form of generatedEmail & " | tr -d '\\n' | pbcopy"
 

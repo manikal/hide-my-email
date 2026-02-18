@@ -23,7 +23,31 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" || $# -eq 0 ]]; then
   exit 0
 fi
 
-email=$(osascript "$APPLESCRIPT" "$@")
+# Spinner while osascript runs
+spin() {
+  local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+  local i=0
+  while true; do
+    printf "\r${DIM}${frames[$((i % 10))]} Generating...${RESET}"
+    sleep 0.1
+    ((i++))
+  done
+}
+spin &
+SPIN_PID=$!
+trap "kill $SPIN_PID 2>/dev/null; printf '\r\033[K'" EXIT
+
+email=$(osascript "$APPLESCRIPT" "$@" 2>&1)
+EXIT_CODE=$?
+
+kill $SPIN_PID 2>/dev/null
+printf '\r\033[K'  # clear spinner line
+trap - EXIT
+
+if [[ $EXIT_CODE -ne 0 ]]; then
+  echo -e "${RED:-\033[0;31m}✗${RESET} ${email}" >&2
+  exit $EXIT_CODE
+fi
 
 # Partially mask the email: show first 3 chars of local part, mask the rest before @
 local_part="${email%%@*}"
