@@ -4,6 +4,8 @@ Generate Apple **Hide My Email** addresses from the terminal.
 
 No private APIs. No cookies. No browser. Just AppleScript driving System Settings.
 
+![hme demo](hme.gif)
+
 ```bash
 $ hme "Netflix"
 ✓ cob************@icloud.com (copied to clipboard)
