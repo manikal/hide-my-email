@@ -25,14 +25,13 @@ on run argv
     set emailNote to item 2 of argv
   end if
   
--- Step 1: Quit System Settings if already open, then open to iCloud
+-- Step 1: Kill System Settings if running, wait until fully gone, then open to iCloud
+  do shell script "killall 'System Settings' 2>/dev/null || true"
   tell application "System Events"
-    if exists process "System Settings" then
-      try
-        tell application "System Settings" to quit
-      end try
-      delay 1
-    end if
+    repeat 20 times
+      if not (exists process "System Settings") then exit repeat
+      delay 0.5
+    end repeat
   end tell
   do shell script "open 'x-apple.systempreferences:com.apple.preferences.AppleIDPrefPane?iCloud'"
 
@@ -175,9 +174,7 @@ on run argv
 
   -- Step 9: Close System Settings
   delay 1.5
-  try
-    tell application "System Settings" to quit
-  end try
+  do shell script "killall 'System Settings' 2>/dev/null || true"
 
   return generatedEmail
 end run
