@@ -1,121 +1,70 @@
-# Hide My Email Generator
+# hme — Hide My Email CLI
 
-Generate Apple **Hide My Email** addresses from the command line on macOS.
+Generate Apple **Hide My Email** addresses from the terminal.
 
-Uses AppleScript UI automation to drive System Settings — no private APIs, no cookies, no browser sessions.
-
-## Demo
+No private APIs. No cookies. No browser. Just AppleScript driving System Settings.
 
 ```bash
 $ hme "Netflix"
-✓ cobalt.coccyx0d@icloud.com (copied to clipboard)
+✓ cob************@icloud.com (copied to clipboard)
 ```
 
-## Requirements
-
-- **macOS Tahoe** (26.x) — UI element paths are specific to this version
-- **iCloud+ subscription** — Hide My Email is an iCloud+ feature
-- **Accessibility permissions** — required for UI automation
-
-## Setup
-
-### 1. Clone the repo
+## Install
 
 ```bash
-git clone https://github.com/manikal/hide-my-email.git
-cd hide-my-email
+curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/main/install.sh | sh
 ```
 
-### 2. Grant Accessibility permissions
+Installs to `~/.hme/bin/` and adds it to your PATH. No sudo required.
 
-`osascript` needs permission to control System Settings via UI automation.
-
-1. Open **System Settings → Privacy & Security → Accessibility**
-2. Click **"+"**
-3. Press **⌘⇧G** and type `/usr/bin/osascript`
-4. Toggle it **on**
-
-> **Tip:** If you wrap this in a `.app` bundle, the app itself gets added instead — cleaner for distribution.
-
-### 3. Add to PATH
-
-```bash
-# Option A: symlink (recommended)
-ln -s "$(pwd)/hme" /usr/local/bin/hme
-
-# Option B: alias in ~/.zshrc
-alias hme='/path/to/hide-my-email/hme'
-```
-
-### 4. Run it
-
-```bash
-hme "MyLabel"
-```
-
-With an optional note:
-
-```bash
-hme "Shopping" "For online orders"
-```
+Then grant Accessibility permissions to Terminal:
+**System Settings → Privacy & Security → Accessibility → add Terminal**
 
 ## Usage
 
-```
-hme <label> [note]
-
-Arguments:
-  label    Label for the email address (required)
-  note     Optional note for the email address
-
-Options:
-  --help   Show usage information
+```bash
+hme "Twitter"
+hme "Shopping" "For online orders"
+hme --help
 ```
 
-The generated email address is:
-- Printed to stdout with a ✓ confirmation
-- Copied to your clipboard automatically
+The generated address is printed to stdout and copied to your clipboard.
 
-> You can also call the AppleScript directly: `osascript hide_my_email.applescript "MyLabel"`
+## Requirements
+
+- macOS Tahoe (26.x)
+- iCloud+ subscription
+- Terminal with Accessibility permissions
 
 ## How it works
 
-The script automates the following flow via macOS Accessibility (UI scripting):
+Automates the same flow you'd do manually:
 
-1. Opens **System Settings → iCloud**
-2. Clicks **Hide My Email** in the iCloud+ Features section
-3. Clicks **Create New Address** (+)
-4. Reads the generated email address
-5. Fills in the label (and optional note)
-6. Clicks **Continue** to save
-7. Copies the email to your clipboard
-
-No network calls, no private APIs — just the same UI flow you'd do manually.
-
-## Advanced: direct AppleScript usage
-
-If you prefer not to use the wrapper:
-
-```bash
-osascript hide_my_email.applescript "Twitter"
-```
+1. Opens System Settings → iCloud
+2. Clicks Hide My Email → Create New Address
+3. Reads the generated address
+4. Fills in your label (and optional note)
+5. Clicks Continue
+6. Copies the address to clipboard
 
 ## Limitations
 
-- **macOS version dependent** — UI element paths change between macOS versions. This is tested on Tahoe (26.x). Pull requests for other versions welcome.
-- **~10 second runtime** — includes delays for UI elements to load.
-- **Rate limited by Apple** — approximately 5 addresses per 30 minutes per iCloud family member.
-- **Requires screen access** — System Settings must be visible (not suitable for headless/SSH sessions).
-- **Window positioning** — the script sets System Settings to a fixed position (100, 100) and size (780×700) for reliable element targeting. Your window will be moved.
+- **~10 second runtime** — UI automation needs time for elements to load
+- **Rate limited by Apple** — roughly 5 addresses per 30 minutes
+- **Screen access required** — not suitable for headless/SSH sessions
+- **Window is repositioned** — the script moves System Settings to a fixed position for reliable element targeting
+
+## Caveat
+
+This tool works by scripting the System Settings UI. Apple can change the UI at any time and break it. It's a scratch-your-own-itch open source project — not production software. Pull requests welcome when it breaks.
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---|---|
-| `"Can't get sheet 1..."` | Increase the `delay` values — your Mac may be slower to load the UI |
+| `"Can't get sheet 1..."` | Increase `delay` values in the AppleScript — your Mac may be slower |
 | `"Timed out waiting..."` | Make sure you're signed into iCloud with an active iCloud+ subscription |
-| Script clicks the wrong button | System Settings window may have been resized. The script resets it, but if issues persist, try running from a fresh `System Settings` state (⌘Q first) |
-| `"Not allowed assistive access"` | Grant Accessibility permissions (see Setup step 2) |
+| `"Not allowed assistive access"` | Grant Accessibility permissions to Terminal (see above) |
 
 ## License
 
