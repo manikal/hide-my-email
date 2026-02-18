@@ -25,4 +25,9 @@ fi
 
 email=$(osascript "$APPLESCRIPT" "$@")
 
-echo -e "${GREEN}✓${RESET} ${email} ${DIM}(copied to clipboard)${RESET}"
+# Partially mask the email: show first 3 chars of local part, mask the rest before @
+local_part="${email%%@*}"
+domain="${email#*@}"
+masked="${local_part:0:3}$(printf '*%.0s' $(seq 1 $((${#local_part} - 3))))@${domain}"
+
+echo -e "${GREEN}✓${RESET} ${masked} ${DIM}(copied to clipboard)${RESET}"
