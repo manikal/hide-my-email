@@ -25,7 +25,15 @@ on run argv
     set emailNote to item 2 of argv
   end if
   
--- Step 1: Open System Settings to iCloud on current desktop
+-- Step 1: Quit System Settings if already open, then open to iCloud
+  tell application "System Events"
+    if exists process "System Settings" then
+      try
+        tell application "System Settings" to quit
+      end try
+      delay 1
+    end if
+  end tell
   do shell script "open 'x-apple.systempreferences:com.apple.preferences.AppleIDPrefPane?iCloud'"
 
   -- Wait for window to appear and set fixed position/size
@@ -82,8 +90,19 @@ on run argv
       end if
     end tell
   end tell
-  delay 2
-  
+  -- Wait for the HME list panel to fully load (scroll area + Create New Address button)
+  tell application "System Events"
+    tell process "System Settings"
+      repeat 30 times
+        try
+          set _btn to button "Create New Address" of group 1 of group 1 of group 1 of UI element 1 of scroll area 1 of sheet 1 of window 1
+          exit repeat
+        end try
+        delay 0.5
+      end repeat
+    end tell
+  end tell
+
   -- Step 3: Click "Create New Address" (+) button
   tell application "System Events"
     tell process "System Settings"
@@ -92,27 +111,37 @@ on run argv
     end tell
   end tell
 
-  -- Wait for create dialog (new sheet appears as sheet 1, pushing original to sheet 2)
+  -- Wait for the create form to load: poll all sheets until email field appears
+  set createSheetIndex to 0
   tell application "System Events"
     tell process "System Settings"
       repeat 30 times
         try
-          if (count of sheets of window 1) ≥ 2 then exit repeat
+          repeat with i from 1 to (count of sheets of window 1)
+            try
+              set _base to group 1 of UI element 1 of scroll area 1 of sheet i of window 1
+              set _email to value of static text 1 of UI element 5 of group 1 of _base
+              if _email is not "" then
+                set createSheetIndex to i
+                exit repeat
+              end if
+            end try
+          end repeat
+          if createSheetIndex > 0 then exit repeat
         end try
         delay 0.5
       end repeat
-      if (count of sheets of window 1) < 2 then
+      if createSheetIndex is 0 then
         error "Timed out waiting for the Create New Address dialog."
       end if
     end tell
   end tell
-  delay 3
 
   -- Step 4: Read generated email, fill in label/note, click Continue
   set generatedEmail to ""
   tell application "System Events"
     tell process "System Settings"
-      set createBase to group 1 of UI element 1 of scroll area 1 of sheet 1 of window 1
+      set createBase to group 1 of UI element 1 of scroll area 1 of sheet createSheetIndex of window 1
       set mainContent to group 1 of createBase
 
       -- The email is static text inside UI element 5 (group with copy button + email text)
@@ -144,23 +173,11 @@ on run argv
   -- Step 8: Copy email to clipboard
   do shell script "echo " & quoted form of generatedEmail & " | tr -d '\\n' | pbcopy"
 
-  -- Step 9: Click Done on the "All set" confirmation and close System Settings
-  delay 2
-  tell application "System Events"
-    tell process "System Settings"
-      -- Wait for Done button to appear in the confirmation screen
-      repeat 15 times
-        try
-          set confirmBase to group 1 of UI element 1 of scroll area 1 of sheet 1 of window 1
-          click button "Done" of group 2 of group 1 of group 2 of confirmBase
-          exit repeat
-        end try
-        delay 0.5
-      end repeat
-    end tell
-  end tell
-  delay 0.5
-  tell application "System Settings" to quit
+  -- Step 9: Close System Settings
+  delay 1.5
+  try
+    tell application "System Settings" to quit
+  end try
 
   return generatedEmail
 end run
