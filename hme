@@ -35,6 +35,7 @@ spin() {
 }
 spin &
 SPIN_PID=$!
+disown $SPIN_PID
 trap "kill $SPIN_PID 2>/dev/null; printf '\r\033[K'" EXIT
 
 email=$(osascript "$APPLESCRIPT" "$@" 2>&1)
