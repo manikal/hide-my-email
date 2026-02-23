@@ -1,7 +1,7 @@
 ---
 name: hide-my-email
 description: Generate Apple Hide My Email addresses from the terminal and copy to clipboard.
-version: "1.0.0"
+version: "1.0.1"
 homepage: https://github.com/manikal/hide-my-email
 metadata:
   openclaw:
@@ -16,8 +16,8 @@ metadata:
         label: "Install hme (git clone, recommended)"
       - id: curl
         kind: shell
-        command: "curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/v1.0.0/install.sh | sh"
-        label: "Install hme (curl, pinned to v1.0.0)"
+        command: "curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/v1.0.1/install.sh | sh"
+        label: "Install hme (curl, pinned to v1.0.1)"
 ---
 
 # Hide My Email CLI

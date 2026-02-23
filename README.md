@@ -23,7 +23,7 @@ git clone --depth=1 https://github.com/manikal/hide-my-email.git ~/.hme
 Or if you prefer a one-liner (inspect [install.sh](install.sh) first):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/v1.0.0/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/v1.0.1/install.sh | sh
 ```
 
 Installs to `~/.hme/bin/`. No sudo required. The installer prints a command to add it to your PATH.
