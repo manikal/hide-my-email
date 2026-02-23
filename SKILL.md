@@ -10,10 +10,14 @@ metadata:
     requires:
       bins: ["hme"]
     install:
+      - id: git
+        kind: shell
+        command: "git clone --depth=1 https://github.com/manikal/hide-my-email.git ~/.hme && chmod +x ~/.hme/hme && echo 'export PATH=\"$HOME/.hme/bin:$PATH\"' >> ~/.zshrc && echo 'Installed. Restart your shell, then run: hme \"Test\"'"
+        label: "Install hme (git clone, recommended)"
       - id: curl
         kind: shell
-        command: "curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/main/install.sh | sh"
-        label: "Install hme (curl)"
+        command: "curl -fsSL https://raw.githubusercontent.com/manikal/hide-my-email/v1.0.0/install.sh | sh"
+        label: "Install hme (curl, pinned to v1.0.0)"
 ---
 
 # Hide My Email CLI

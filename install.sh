@@ -39,7 +39,13 @@ fi
 # Set up bin dir with the hme script
 mkdir -p "$BIN_DIR"
 cp "$INSTALL_DIR/hme" "$BIN_DIR/hme"
+cp "$INSTALL_DIR/hide_my_email.applescript" "$BIN_DIR/hide_my_email.applescript"
 chmod +x "$BIN_DIR/hme"
+
+# Show file hashes so users can verify against the repo
+echo -e "  ${DIM}Installed file checksums (verify at $REPO):${RESET}"
+echo -e "  ${DIM}hme:         $(shasum -a 256 "$BIN_DIR/hme" | cut -d' ' -f1 | head -c 16)...${RESET}"
+echo -e "  ${DIM}applescript: $(shasum -a 256 "$BIN_DIR/hide_my_email.applescript" | cut -d' ' -f1 | head -c 16)...${RESET}"
 
 # Detect shell profile
 detect_profile() {
@@ -61,13 +67,15 @@ PROFILE_FILE="$(detect_profile)"
 
 if [[ -n "$PROFILE_FILE" ]]; then
   if ! grep -q '.hme/bin' "$PROFILE_FILE"; then
-    printf '\n# hme\n%s\n' "$PATH_LINE" >> "$PROFILE_FILE"
-    echo -e "  ${GREEN}✓${RESET} Added hme to PATH in $PROFILE_FILE"
+    echo -e "  ${DIM}To add hme to your PATH, run:${RESET}"
+    echo ""
+    echo "  echo '$PATH_LINE' >> $PROFILE_FILE"
+    echo ""
   else
     echo -e "  ${GREEN}✓${RESET} PATH already configured in $PROFILE_FILE"
   fi
 else
-  echo -e "  ${DIM}Could not detect shell profile. Add this manually:${RESET}"
+  echo -e "  ${DIM}Add this to your shell profile:${RESET}"
   echo -e "  $PATH_LINE"
 fi
 
